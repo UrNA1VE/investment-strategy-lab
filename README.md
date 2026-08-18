@@ -28,7 +28,7 @@ Backtest orchestration
         |
         v
 Domain Layer
-Account, Asset, Portfolio, Trade, Strategy, BacktestRun
+Account, Stock, Portfolio, Trade, Strategy, BacktestRun
         |
         v
 Data Layer
@@ -41,7 +41,7 @@ Docker, Azure Container Apps, Azure Static Web Apps, GitHub Actions
 
 ## Why Class-Based Design
 
-The backend starts with class-based domain objects so the system can later support multiple accounts, multiple stocks, multiple strategies, saved backtest runs, and additional metrics without rewriting the core engine.
+The backend starts with class-based domain objects so the system can later support multiple accounts, multiple stocks, multiple data frequencies, multiple strategies, saved backtest runs, and additional metrics without rewriting the core engine.
 
 ## Current Phase
 
@@ -52,6 +52,13 @@ Phase 0 creates the project foundation:
 - Health check endpoint
 - Class-based domain object placeholders
 - Initial documentation
+
+Phase 1 adds a class-based stock data model:
+
+- `Stock` abstract base class
+- `DailyStock` and `HourlyStock`
+- yfinance loading during stock initialization
+- Standardized OHLCV output through `GET /api/prices`
 
 ## Local Backend Setup
 
@@ -77,3 +84,14 @@ Expected response:
   "service": "cloud-investment-strategy-lab"
 }
 ```
+
+## Price Data Endpoint
+
+```text
+GET /api/prices?stock_name=AAPL&start=2024-01-01&end=2024-01-31&data_type=daily
+```
+
+Supported `data_type` values:
+
+- `daily`
+- `hourly`
