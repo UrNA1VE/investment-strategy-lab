@@ -18,6 +18,7 @@ In a second terminal, start Streamlit:
 ```bash
 cd /Users/qiankangwang/Desktop/investment-strategy-lab
 source backend/.venv/bin/activate
+pip install -r frontend/requirements.txt
 streamlit run frontend/streamlit_app.py
 ```
 

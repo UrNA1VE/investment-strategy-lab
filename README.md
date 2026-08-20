@@ -95,3 +95,18 @@ Supported `data_type` values:
 
 - `daily`
 - `hourly`
+
+## Azure Deployment
+
+The project includes a manual GitHub Actions workflow for deploying the backend
+and frontend Docker images to existing Azure Container Apps:
+
+```text
+.github/workflows/deploy-azure-container-apps.yml
+```
+
+Setup notes live in:
+
+```text
+deployment/github-actions-azure.md
+```
