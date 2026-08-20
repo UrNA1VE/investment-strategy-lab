@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field
+from typing import Any
 
-from app.strategies.base import BaseStrategy, Signal, SignalAction
+from app.strategies.base import Signal, SignalAction
 from app.domain.trade import Trade
 import pandas as pd
 
@@ -8,13 +9,16 @@ import pandas as pd
 @dataclass
 class PortfolioStrategy:
     name: str
-    strategy: BaseStrategy
+    strategy: Any
 
-    def generate_signals(self) -> list[Signal]:
+    def generate_signal(self, current_date) -> list[Signal]:
         return [
             signal.with_strategy_name(self.name)
-            for signal in self.strategy.generate_signals()
+            for signal in self.strategy.generate_signal(current_date)
         ]
+
+    def reset_state(self) -> None:
+        self.strategy.reset_state()
 
 
 @dataclass
@@ -34,27 +38,8 @@ class Portfolio:
     def __post_init__(self) -> None:
         self.initial_capital = self.cash
 
-    def add_strategy(self, name: str, strategy: BaseStrategy) -> None:
+    def add_strategy(self, name: str, strategy: Any) -> None:
         self.strategies[name] = PortfolioStrategy(name=name, strategy=strategy)
-
-    def add_stragety(self, name: str, strategy: BaseStrategy) -> None:
-        self.add_strategy(name, strategy)
-
-    def generate_signals(self) -> pd.DataFrame:
-        signals: list[Signal] = []
-        for portfolio_strategy in self.strategies.values():
-            signals.extend(portfolio_strategy.generate_signals())
-
-        sorted_signals = sorted(signals, key=lambda signal: signal.signal_date)
-        return pd.DataFrame(
-            [
-                {
-                    "date": signal.signal_date,
-                    "signal": signal,
-                }
-                for signal in sorted_signals
-            ]
-        )
 
     def buy_support(self, signal: Signal) -> bool:
         if self.cash is None:
@@ -129,26 +114,38 @@ class Portfolio:
         }
         self.daily_values.append(daily_value)
         return 
+
+    def reset(self) -> None:
+        self.positions= {}
+        self.trades = []
+        self.daily_values = []
+        self.latest_prices = {}
+        self.cash = self.initial_capital
+        for portfolio_strategy in self.strategies.values():
+            portfolio_strategy.reset_state()
+        return 
     
     def run(self) -> pd.DataFrame | str:
-        self.daily_values = []
+        self.reset()
         if len(self.strategies) == 0:
             return "Please add at least one strategy"
 
-        signal_table = self.generate_signals()
         trading_days = self.get_trading_days()
 
         for current_date in trading_days:
-            today_signals = signal_table[signal_table["date"] == current_date]
-            for signal in today_signals["signal"]:
-                trade = self.action(signal)
-                self.trades.append(trade)
-
             prices = self.get_prices_for_date(current_date)
+            self.latest_prices.update(prices)
+
+            for portfolio_strategy in self.strategies.values():
+                today_signals = portfolio_strategy.generate_signal(current_date)
+                for signal in today_signals:
+                    trade = self.action(signal)
+                    self.trades.append(trade)
+
             self.record_daily_value(current_date, prices)
 
         return self.generate_report_data
-    
+
     @property
     def generate_report_data(self) -> pd.DataFrame:
         return pd.DataFrame(self.daily_values)

@@ -20,10 +20,13 @@ class Account:
             raise ValueError(f'{name} found in existing portfolio names, please choose a different name')
         self.portfolios[name] = Portfolio(cash = cash)
     
-    def assign_initial_captical(self, name: str, new_capital: float) -> None:
+    def assign_initial_capital(self, name: str, new_capital: float) -> None:
         if name not in self.portfolios:
             raise ValueError(f'{name} not found in existing portfolio names')
         self.portfolios[name]._change_capital(new_capital)
+
+    def assign_initial_captical(self, name: str, new_capital: float) -> None:
+        self.assign_initial_capital(name, new_capital)
 
     def backtest(self) -> str:
         for name in self.portfolios:

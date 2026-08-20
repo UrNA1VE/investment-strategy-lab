@@ -34,3 +34,13 @@ def test_account_summary_aggregates_portfolio_summaries() -> None:
     assert summary["total_pnl"] == 0
     assert summary["total_return"] == 0
     assert set(summary["portfolios"]) == {"growth", "income"}
+
+
+def test_account_assign_initial_capital_updates_existing_portfolio() -> None:
+    account = Account(name="Demo")
+    account.create_portfolio("main", cash=1000)
+
+    account.assign_initial_capital("main", 1500)
+
+    assert account.portfolios["main"].cash == 1500
+    assert account.portfolios["main"].initial_capital == 1500

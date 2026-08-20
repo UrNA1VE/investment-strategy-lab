@@ -10,6 +10,7 @@ router = APIRouter(prefix="/api", tags=["prices"])
 
 
 def get_market_data_service() -> MarketDataService:
+    # Dependency wrapper so the endpoint can request market data through one service.
     return MarketDataService()
 
 
@@ -21,6 +22,7 @@ def get_prices(
     data_type: str = Query(default="daily", examples=["daily"]),
     market_data_service: MarketDataService = Depends(get_market_data_service),
 ) -> PriceDataResponse:
+    # Load and return cleaned stock price data for API clients.
     try:
         stock = market_data_service.get_stock(
             stock_name=stock_name,
