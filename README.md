@@ -1,64 +1,57 @@
 # Cloud Investment Strategy Lab
 
-Cloud Investment Strategy Lab is a cloud-ready data analytics project for running simple rule-based investment backtests with public market data. The project uses stock data as an accessible dataset, while the main focus is backend architecture, data ingestion, ETL, caching, containerization, and cloud deployment.
+Cloud Investment Strategy Lab is a containerized data analytics project for running simple rule-based investment backtests with public market data. It uses a FastAPI backend, a Streamlit frontend, Docker, GitHub Actions, Azure Container Registry, and Azure Container Apps.
 
-## MVP Goal
+## Completed Features
 
-The first version will allow a user to:
+- Fetch daily or hourly stock price data from yfinance.
+- Run a rule-based backtest through a FastAPI endpoint.
+- Configure buy and sell trading rules from a Streamlit page.
+- View two result charts: stock price and portfolio value.
+- Run the backend and frontend locally as separate services.
+- Run the backend and frontend locally with Docker Compose.
+- Deploy backend and frontend containers to Azure Container Apps.
+- Build and push Docker images through a manual GitHub Actions workflow.
 
-1. Select a stock ticker.
-2. Select a date range.
-3. Select a simple trading strategy.
-4. Run a backtest.
-5. View portfolio metrics, equity curve data, and trade records.
-
-## Architecture Direction
+## Architecture
 
 ```text
-Frontend
-Simple form and results dashboard
+Streamlit Frontend
+One-page input form and result charts
         |
         v
 FastAPI Backend
 API routes and request validation
         |
         v
-Service Layer
-Backtest orchestration
-        |
-        v
 Domain Layer
-Account, Stock, Portfolio, Trade, Strategy, BacktestRun
+Stock, Account, Portfolio, Trade, RuleStrategy
         |
         v
-Data Layer
-Market data source, ETL, cache
+Market Data
+yfinance stock price data
         |
         v
 Cloud
-Docker, Azure Container Apps, Azure Static Web Apps, GitHub Actions
+Docker, Azure Container Registry, Azure Container Apps, GitHub Actions
 ```
 
 ## Why Class-Based Design
 
-The backend starts with class-based domain objects so the system can later support multiple accounts, multiple stocks, multiple data frequencies, multiple strategies, saved backtest runs, and additional metrics without rewriting the core engine.
+The backend uses class-based domain objects for accounts, stocks, portfolios, trades, conditions, sizing, and rule strategies. This keeps the current version small while making the core backtesting logic easier to extend.
 
-## Current Phase
+## Backend
 
-Phase 0 creates the project foundation:
+The FastAPI backend includes:
 
-- Monorepo folder structure
-- FastAPI backend skeleton
 - Health check endpoint
-- Class-based domain object placeholders
-- Initial documentation
-
-Phase 1 adds a class-based stock data model:
-
-- `Stock` abstract base class
+- Price data endpoint
+- Backtest endpoint
+- `Stock` base class
 - `DailyStock` and `HourlyStock`
-- yfinance loading during stock initialization
-- Standardized OHLCV output through `GET /api/prices`
+- `Portfolio` daily backtest loop
+- `RuleStrategy` with condition, action, and sizing
+- Portfolio and account summary methods
 
 ## Local Backend Setup
 
@@ -96,10 +89,41 @@ Supported `data_type` values:
 - `daily`
 - `hourly`
 
+## Local Frontend Setup
+
+Start the backend first, then run Streamlit from the project root:
+
+```bash
+source backend/.venv/bin/activate
+pip install -r frontend/requirements.txt
+streamlit run frontend/streamlit_app.py
+```
+
+Then open:
+
+```text
+http://127.0.0.1:8501
+```
+
+## Docker Compose
+
+Run both services locally:
+
+```bash
+docker compose -f deployment/docker-compose.yml up --build
+```
+
 ## Azure Deployment
 
-The project includes a manual GitHub Actions workflow for deploying the backend
-and frontend Docker images to existing Azure Container Apps:
+The project has been deployed with:
+
+- Azure Container Registry: `qkwinvestmentlabacr`
+- Backend Azure Container App: `investment-strategy-backend`
+- Frontend Azure Container App: `investment-strategy-frontend`
+- Resource group: `portfolio-rg`
+
+The repository includes a manual GitHub Actions workflow for building and
+deploying the backend and frontend Docker images:
 
 ```text
 .github/workflows/deploy-azure-container-apps.yml

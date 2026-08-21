@@ -45,12 +45,15 @@ Then open:
 http://127.0.0.1:8502
 ```
 
-## Planned Azure Path
+## Azure Resources
 
-1. Push the backend image and frontend image to Azure Container Registry.
-2. Deploy both images to Azure Container Apps.
-3. Set the frontend container environment variable `API_BASE_URL` to the backend app URL.
-4. Add GitHub Actions workflows for CI/CD.
+The project has been deployed with these Azure resources:
+
+- Resource group: `portfolio-rg`
+- Azure Container Registry: `qkwinvestmentlabacr`
+- Backend Container App: `investment-strategy-backend`
+- Frontend Container App: `investment-strategy-frontend`
+- Container Apps Environment: `managedEnvironment-portfoliorg-b59e`
 
 ## GitHub Actions
 
@@ -61,5 +64,5 @@ deployment/github-actions-azure.md
 ```
 
 The workflow updates existing Azure Container Apps instead of creating cloud
-resources automatically. This keeps permissions, cost, and public exposure more
-controlled while the project is still in an early portfolio phase.
+resources automatically. It builds backend and frontend Docker images, pushes
+them to Azure Container Registry, and updates the existing Container Apps.
