@@ -12,6 +12,13 @@ import streamlit as st
 
 API_BASE_URL = os.getenv("API_BASE_URL", "http://127.0.0.1:8000")
 
+trade_columns = [
+    "trade_date",
+    "side",
+    "stock_name",
+    "quantity",
+    "price"]
+
 
 def post_json(path: str, payload: dict) -> dict:
     # Send JSON input from the Streamlit UI to the FastAPI backend.
@@ -220,5 +227,31 @@ if run_clicked:
             with chart_col_2:
                 st.subheader("Portfolio Value")
                 st.line_chart(daily_value_df, x="date", y="total_value")
+
+            
+            summary = result["summary"]
+
+            metric_col_1, metric_col_2, metric_col_3, metric_col_4 = st.columns(4)
+
+            with metric_col_1:
+                st.metric("Initial Capital", f'${summary["initial_capital"]:,.2f}')
+
+            with metric_col_2:
+                st.metric("Final Value", f'${summary["final_value"]:,.2f}')
+
+            with metric_col_3:
+                st.metric("Total Return", f'{summary["total_return"]:.2%}')
+
+            with metric_col_4:
+                st.metric("PnL", f'${summary["total_pnl"]:,.2f}')
+                        
+            trade_df = pd.DataFrame(result["trades"])
+            if not trade_df.empty:
+                visible_columns = [column for column in trade_columns if column in trade_df.columns]
+
+                with st.expander("Trade History", expanded=False):
+                    st.dataframe(trade_df[visible_columns], use_container_width=True)
+            else:
+                st.info("No trades were generated for this backtest.")
 
 st.caption("More features are still under development.")
